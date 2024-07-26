@@ -37,11 +37,8 @@ Make your changes and commit them.
 Push to your branch on GitHub.
 Open a pull request to merge your changes.
 
-License
-This project is licensed under the MIT License. See the LICENSE file for details.
-
 Contact
 For any questions or feedback, you can reach me at:
 
-Email: your.email@example.com
+Email: meghana.katraju@gmail.com
 GitHub: MeghanaKatraju31
