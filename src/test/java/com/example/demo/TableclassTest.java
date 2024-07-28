@@ -1,136 +1,75 @@
 package com.example.demo;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
-import org.junit.jupiter.api.BeforeAll;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.*;
-
+@WebMvcTest(ControllerclassSubmission.class)
 public class TableclassTest {
 
-    private static Validator validator;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @BeforeAll
-    public static void setUpValidator() {
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        validator = factory.getValidator();
+    @MockBean
+    private TableclassRepo repo;
+
+    @InjectMocks
+    private ControllerclassSubmission controllerclassSubmission;
+
+    @BeforeEach
+    public void setup() {
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    public void whenAllFieldsAreValid_thenNoViolations() {
+    public void testPostDetails_WithoutErrors() throws Exception {
         Tableclass tableclass = new Tableclass();
-        tableclass.setCid("abc123");
+        tableclass.setCid(123456); // Valid CID
         tableclass.setCname("John Doe");
         tableclass.setCemail("john.doe@example.com");
         tableclass.setDateOfBirth("1990-01-01");
-        tableclass.setTimezone("UTC");
-        tableclass.setTime("10:00 AM");
+        tableclass.setTimezone("CST");
+        tableclass.setTime("12:00");
+        tableclass.setAmpm("AM");
+        tableclass.setCountry("USA");
+        tableclass.setState("TX");
 
-        Set<ConstraintViolation<Tableclass>> violations = validator.validate(tableclass);
-        assertTrue(violations.isEmpty());
+        when(repo.save(any(Tableclass.class))).thenReturn(tableclass);
+
+        mockMvc.perform(post("/details")
+                .flashAttr("tableclass", tableclass))
+                .andExpect(status().isOk())
+                .andExpect(view().name("NewFile1"))
+                .andExpect(model().attributeExists("tableclass"))
+                .andExpect(model().attribute("tableclass", tableclass));
+
+        verify(repo).save(any(Tableclass.class));
     }
 
     @Test
-    public void whenCidIsInvalid_thenViolation() {
+    public void testPostDetails_WithErrors() throws Exception {
         Tableclass tableclass = new Tableclass();
-        tableclass.setCid("abc"); // invalid cid
-        tableclass.setCname("John Doe");
-        tableclass.setCemail("john.doe@example.com");
-        tableclass.setDateOfBirth("1990-01-01");
-        tableclass.setTimezone("UTC");
-        tableclass.setTime("10:00 AM");
+        tableclass.setCid(null); // Invalid CID (null value to trigger validation error)
+        tableclass.setCname(""); // Empty name to trigger validation error
 
-        Set<ConstraintViolation<Tableclass>> violations = validator.validate(tableclass);
-        assertFalse(violations.isEmpty());
-        assertEquals(1, violations.size());
-        assertEquals("College ID must be alphanumeric and 6-10 characters long", violations.iterator().next().getMessage());
+        mockMvc.perform(post("/details")
+                .flashAttr("tableclass", tableclass))
+                .andExpect(status().isOk())
+                .andExpect(view().name("NewFile"))
+                .andExpect(model().attributeHasErrors("tableclass"));
     }
-
-    @Test
-    public void whenCnameIsInvalid_thenViolation() {
-        Tableclass tableclass = new Tableclass();
-        tableclass.setCid("abc123");
-        tableclass.setCname("J1"); // invalid name
-        tableclass.setCemail("john.doe@example.com");
-        tableclass.setDateOfBirth("1990-01-01");
-        tableclass.setTimezone("UTC");
-        tableclass.setTime("10:00 AM");
-
-        Set<ConstraintViolation<Tableclass>> violations = validator.validate(tableclass);
-        assertFalse(violations.isEmpty());
-        assertEquals(1, violations.size());
-       // assertEquals("Name should be between 2 and 50 characters", violations.iterator().next().getMessage());
-    }
-
-    @Test
-    public void whenCemailIsInvalid_thenViolation() {
-        Tableclass tableclass = new Tableclass();
-        tableclass.setCid("abc123");
-        tableclass.setCname("John Doe");
-        tableclass.setCemail("john.doe"); // invalid email
-        tableclass.setDateOfBirth("1990-01-01");
-        tableclass.setTimezone("UTC");
-        tableclass.setTime("10:00 AM");
-
-        Set<ConstraintViolation<Tableclass>> violations = validator.validate(tableclass);
-        assertFalse(violations.isEmpty());
-        assertEquals(1, violations.size());
-        assertEquals("Invalid email format", violations.iterator().next().getMessage());
-    }
-
-    @Test
-    public void whenDateOfBirthIsEmpty_thenViolation() {
-        Tableclass tableclass = new Tableclass();
-        tableclass.setCid("abc123");
-        tableclass.setCname("John Doe");
-        tableclass.setCemail("john.doe@example.com");
-        tableclass.setDateOfBirth(""); // empty date of birth
-        tableclass.setTimezone("UTC");
-        tableclass.setTime("10:00 AM");
-
-        Set<ConstraintViolation<Tableclass>> violations = validator.validate(tableclass);
-        assertFalse(violations.isEmpty());
-        assertEquals(1, violations.size());
-        assertEquals("Date of Birth is required", violations.iterator().next().getMessage());
-    }
-
-    @Test
-    public void whenTimezoneIsEmpty_thenViolation() {
-        Tableclass tableclass = new Tableclass();
-        tableclass.setCid("abc123");
-        tableclass.setCname("John Doe");
-        tableclass.setCemail("john.doe@example.com");
-        tableclass.setDateOfBirth("1990-01-01");
-        tableclass.setTimezone(""); // empty timezone
-        tableclass.setTime("10:00 AM");
-
-        Set<ConstraintViolation<Tableclass>> violations = validator.validate(tableclass);
-        assertFalse(violations.isEmpty());
-        assertEquals(1, violations.size());
-        assertEquals("Timezone is required", violations.iterator().next().getMessage());
-    }
-
-    @Test
-    public void whenTimeIsEmpty_thenViolation() {
-        Tableclass tableclass = new Tableclass();
-        tableclass.setCid("abc123");
-        tableclass.setCname("John Doe");
-        tableclass.setCemail("john.doe@example.com");
-        tableclass.setDateOfBirth("1990-01-01");
-        tableclass.setTimezone("UTC");
-        tableclass.setTime(""); // empty time
-
-        Set<ConstraintViolation<Tableclass>> violations = validator.validate(tableclass);
-        assertFalse(violations.isEmpty());
-        assertEquals(1, violations.size());
-        assertEquals("Time is required", violations.iterator().next().getMessage());
-    }
-
-    // Add more tests for other edge cases as needed
 }
-

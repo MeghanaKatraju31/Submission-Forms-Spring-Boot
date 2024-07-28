@@ -3,7 +3,8 @@ package com.example.demo;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
@@ -11,51 +12,38 @@ import jakarta.validation.constraints.Size;
 public class Tableclass {
 
     @Id
-    @NotEmpty(message = "College ID is required")
-    @Pattern(regexp = "^[a-zA-Z0-9]{6,10}$", message = "College ID must be alphanumeric and 6-10 characters long")
-    private String cid;
+    @NotNull(message = "College ID is required")
+    private Integer cid;
 
-    @NotEmpty(message = "Name is required")
+    @NotBlank(message = "Name is required")
     @Size(min = 2, max = 50, message = "Name should be between 2 and 50 characters")
     @Pattern(regexp = "^[a-zA-Z ]+$", message = "Name can only contain letters and spaces")
     private String cname;
 
-    @NotEmpty(message = "Email is required")
+    @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
     private String cemail;
 
-    @NotEmpty(message = "Date of Birth is required")
+    @NotBlank(message = "Date of Birth is required")
     private String dateOfBirth;
 
-    @NotEmpty(message = "Timezone is required")
+    @NotBlank(message = "Timezone is required")
     private String timezone;
-    
-    @NotEmpty(message = "Time is required")
+
+    @NotBlank(message = "Time is required")
     private String time;
 
     private String ampm;
+    private String country;
+    private String state;
 
-    public String getAmpm() {
-        return ampm;
-    }
+    // Getters and Setters
 
-    public void setAmpm(String ampm) {
-        this.ampm = ampm;
-    }
-
-    public String getTime() {
-        return time;
-    }
-
-    public void setTime(String time) {
-        this.time = time;
-    }
-
-    public String getCid() {
+    public Integer getCid() {
         return cid;
     }
 
-    public void setCid(String cid) {
+    public void setCid(Integer cid) {
         this.cid = cid;
     }
 
@@ -89,6 +77,38 @@ public class Tableclass {
 
     public void setTimezone(String timezone) {
         this.timezone = timezone;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
+    public String getAmpm() {
+        return ampm;
+    }
+
+    public void setAmpm(String ampm) {
+        this.ampm = ampm;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
     }
 
     @Override
